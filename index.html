@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>changepoint</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">changepoint</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="./index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">nbadata</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#高维检测方法简介" id="toc-高维检测方法简介" class="nav-link active" data-scroll-target="#高维检测方法简介">高维检测方法简介</a>
+  <ul class="collapse">
+  <li><a href="#changepoint.mv-包" id="toc-changepoint.mv-包" class="nav-link" data-scroll-target="#changepoint.mv-包"><strong>1. <code>changepoint.mv</code> 包</strong></a></li>
+  <li><a href="#核心参数详解" id="toc-核心参数详解" class="nav-link" data-scroll-target="#核心参数详解">核心参数详解</a></li>
+  <li><a href="#bcp-包" id="toc-bcp-包" class="nav-link" data-scroll-target="#bcp-包"><strong>2. <code>bcp</code> 包</strong></a></li>
+  <li><a href="#multivar.change.point-包" id="toc-multivar.change.point-包" class="nav-link" data-scroll-target="#multivar.change.point-包"><strong>3. <code>multivar.change.point</code> 包</strong></a></li>
+  <li><a href="#highdimchange-包" id="toc-highdimchange-包" class="nav-link" data-scroll-target="#highdimchange-包"><strong>4. <code>highdimchange</code> 包</strong></a></li>
+  <li><a href="#hdcd" id="toc-hdcd" class="nav-link" data-scroll-target="#hdcd"><strong>5.<code>HDCD</code></strong></a></li>
+  <li><a href="#总结" id="toc-总结" class="nav-link" data-scroll-target="#总结">总结</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">changepoint</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This is a Quarto website.</p>
+<p>To learn more about Quarto websites visit <a href="https://quarto.org/docs/websites" class="uri">https://quarto.org/docs/websites</a>.</p>
+<section id="高维检测方法简介" class="level2">
+<h2 class="anchored" data-anchor-id="高维检测方法简介">高维检测方法简介</h2>
+<section id="changepoint.mv-包" class="level3">
+<h3 class="anchored" data-anchor-id="changepoint.mv-包"><strong>1. <code>changepoint.mv</code> 包</strong></h3>
+<p>cpt.meanvar()方法</p>
+</section>
+<section id="核心参数详解" class="level3">
+<h3 class="anchored" data-anchor-id="核心参数详解">核心参数详解</h3>
+<section id="method检测算法" class="level4">
+<h4 class="anchored" data-anchor-id="method检测算法">1. <strong><code>method</code></strong>（检测算法）</h4>
+<p>控制变点搜索的算法，直接影响计算效率和结果精度。</p>
+<ul>
+<li><p><strong>可选值</strong>：</p>
+<ul>
+<li><p><code>"PELT"</code>（默认）: 基于动态规划的高效算法，适合大规模数据。假设变点数量随数据量线性增加。</p></li>
+<li><p><code>"BinSeg"</code>（Binary Segmentation）: 二分递归法，速度快但可能漏检复杂变点。需指定最大变点数量（<code>Q</code>）。</p></li>
+<li><p><code>"AMOC"</code>（At Most One Change）: 仅检测单个变点，适用于已知只有一个变化的场景。</p></li>
+</ul></li>
+<li><p><strong>推荐设置</strong>：</p>
+<ul>
+<li>高维数据优先用 <code>"PELT"</code>，若计算时间过长再尝试 <code>"BinSeg"</code>。</li>
+</ul></li>
+</ul>
+</section>
+<section id="test.stat统计假设" class="level4">
+<h4 class="anchored" data-anchor-id="test.stat统计假设">2. <strong><code>test.stat</code></strong>（统计假设）</h4>
+<p>定义数据分布的假设，决定变点检测的统计模型。</p>
+<ul>
+<li><p><strong>可选值</strong>：</p>
+<ul>
+<li><p><code>"Normal"</code>: 假设多变量正态分布（默认），依赖协方差矩阵估计。适用于连续型数据。</p></li>
+<li><p><code>"Empirical"</code>: 非参数方法，基于经验协方差矩阵。适合非正态分布或离群点较多的数据。</p></li>
+</ul></li>
+<li><p><strong>调整建议</strong>：</p>
+<ul>
+<li>检查数据正态性（如 <code>MVN::mvnTest(data_matrix)</code>），非正态时改用 <code>"Empirical"</code>。</li>
+</ul></li>
+</ul>
+</section>
+<section id="penalty惩罚项" class="level4">
+<h4 class="anchored" data-anchor-id="penalty惩罚项">3. <strong><code>penalty</code></strong>（惩罚项）</h4>
+<p>控制变点数量的复杂度惩罚，避免过拟合。</p>
+<ul>
+<li><p><strong>可选值</strong>：</p>
+<ul>
+<li><p><code>"MBIC"</code>（默认）: 改进的BIC准则，适用于多变量数据。</p></li>
+<li><p><code>"BIC"</code>, <code>"AIC"</code>: 经典信息准则（BIC更严格，AIC更宽松）。</p></li>
+<li><p><code>"Manual"</code>: 手动指定惩罚值（需配合 <code>pen.value</code>）。</p></li>
+</ul></li>
+<li><p><strong>调整策略</strong>：</p>
+<ul>
+<li><p>若检测到过多变点 → 增大 <code>pen.value</code> 或改用 <code>"MBIC"</code>/<code>"BIC"</code>。</p></li>
+<li><p>若检测到过少变点 → 减小 <code>pen.value</code> 或改用 <code>"AIC"</code>。</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="minseglen最小段长度" class="level4">
+<h4 class="anchored" data-anchor-id="minseglen最小段长度">4. <strong><code>minseglen</code></strong>（最小段长度）</h4>
+<p>定义两个相邻变点之间的最小数据长度。</p>
+<ul>
+<li><p><strong>作用</strong>：防止检测到过短的无关波动。</p></li>
+<li><p><strong>推荐值</strong>：通常设为数据总长度的 5-10%。例如 1000 个时间点 → <code>minseglen = 50</code>。</p></li>
+</ul>
+</section>
+<section id="q最大变点数量" class="level4">
+<h4 class="anchored" data-anchor-id="q最大变点数量">5. <strong><code>Q</code></strong>（最大变点数量）</h4>
+<p>仅当 <code>method = "BinSeg"</code> 时生效，限制最大检测数量。</p>
+<ul>
+<li><p><strong>调整建议</strong>：</p>
+<ul>
+<li>先使用 <code>"PELT"</code> 自动检测，若结果不合理再尝试 <code>"BinSeg"</code> + 预设 <code>Q</code>。</li>
+</ul></li>
+</ul>
+</section>
+<section id="调参建议" class="level4">
+<h4 class="anchored" data-anchor-id="调参建议"><strong>调参建议</strong>：</h4>
+<ul>
+<li><p><strong><code>method</code></strong>：可以根据数据的特点选择合适的变点检测方法。对于小样本数据，动态规划方法（<code>"dynamic"</code>）可能更有效，而对于大样本数据，二分法（<code>"binseg"</code>）较为常用。</p></li>
+<li><p><strong><code>penalty</code></strong>：通过设置不同的惩罚（<code>"MBIC"</code>, <code>"BIC"</code>, <code>"AIC"</code>），可以控制变点的数量。<code>MBIC</code>通常会检测较少的变点，而<code>AIC</code>可能会检测出更多的变点。</p></li>
+<li><p><strong><code>minseglen</code></strong>：如果变点之间的时间间隔较长，可以通过增加最小段长度来减少过于频繁的变点检测。</p></li>
+</ul>
+</section>
+</section>
+<section id="bcp-包" class="level3">
+<h3 class="anchored" data-anchor-id="bcp-包"><strong>2. <code>bcp</code> 包</strong></h3>
+<p><code>bcp</code> 是基于 <strong>贝叶斯方法</strong> 的变点检测工具，适用于 <strong>单变量</strong> 或 <strong>多变量</strong> 时间序列数据。它通过贝叶斯推断来计算变点的后验概率。</p>
+<section id="方法和参数" class="level4">
+<h4 class="anchored" data-anchor-id="方法和参数"><strong>方法和参数</strong>：</h4>
+<ul>
+<li><p><strong><code>bcp()</code></strong>：主要用于单变量时间序列的变点检测。</p>
+<ul>
+<li>通过 <strong>MCMC（马尔科夫链蒙特卡洛）</strong> 方法来估计变点的后验分布。</li>
+</ul></li>
+</ul>
+</section>
+<section id="重要参数" class="level4">
+<h4 class="anchored" data-anchor-id="重要参数"><strong>重要参数</strong>：</h4>
+<ul>
+<li><p><strong><code>data</code></strong>：输入的时间序列数据。</p></li>
+<li><p><strong><code>prior</code></strong>：指定先验分布，常用的先验包括 <code>"uniform"</code> 或 <code>"normal"</code>。</p></li>
+<li><p><strong><code>changepoint_prior</code></strong>：变点的先验分布，默认使用 <code>beta</code> 分布。</p></li>
+</ul>
+</section>
+<section id="调参方法" class="level4">
+<h4 class="anchored" data-anchor-id="调参方法"><strong>调参方法</strong>：</h4>
+</section>
+<section id="调参建议-1" class="level4">
+<h4 class="anchored" data-anchor-id="调参建议-1"><strong>调参建议</strong>：</h4>
+<ul>
+<li><p><strong><code>prior</code></strong>：如果你对变点发生的先验分布有假设，可以选择不同的先验分布。<code>"uniform"</code> 是常用的默认选择，表示对所有位置的变点有相等的先验概率。</p></li>
+<li><p><strong><code>changepoint_prior</code></strong>：通过调整 <code>changepoint_prior</code> 可以控制变点位置的先验，值越大，表示对变点的可能性给予更高的先验概率。</p></li>
+</ul>
+</section>
+</section>
+<section id="multivar.change.point-包" class="level3">
+<h3 class="anchored" data-anchor-id="multivar.change.point-包"><strong>3. <code>multivar.change.point</code> 包</strong></h3>
+<p><code>multivar.change.point</code> 包专为 <strong>多变量时间序列数据</strong> 设计，基于协方差矩阵的变化来检测变点。</p>
+<section id="方法和参数-1" class="level4">
+<h4 class="anchored" data-anchor-id="方法和参数-1"><strong>方法和参数</strong>：</h4>
+<ul>
+<li><p><strong><code>mvChangePoint()</code></strong>：用于多变量时间序列的变点检测。</p>
+<ul>
+<li>它通过计算多变量时间序列的 <strong>协方差矩阵</strong> 或其他相关统计量来检测数据中的变化。</li>
+</ul></li>
+</ul>
+</section>
+<section id="重要参数-1" class="level4">
+<h4 class="anchored" data-anchor-id="重要参数-1"><strong>重要参数</strong>：</h4>
+<ul>
+<li><p><strong><code>data</code></strong>：输入的时间序列数据（多变量数据框）。</p></li>
+<li><p><strong><code>penalty</code></strong>：控制变点检测的敏感度，类似于正则化。</p></li>
+<li><p><strong><code>minseglen</code></strong>：最小段长度，控制每个段的最小时间点数。</p></li>
+</ul>
+</section>
+<section id="调参方法-1" class="level4">
+<h4 class="anchored" data-anchor-id="调参方法-1"><strong>调参方法</strong>：</h4>
+</section>
+<section id="调参建议-2" class="level4">
+<h4 class="anchored" data-anchor-id="调参建议-2"><strong>调参建议</strong>：</h4>
+<ul>
+<li><p><strong><code>penalty</code></strong>：可以使用不同的惩罚（如 <code>"BIC"</code> 或 <code>"AIC"</code>）来控制变点的数量。</p></li>
+<li><p><strong><code>minseglen</code></strong>：如果数据有较大的波动，可以增加最小段长度来减少频繁的变点。</p></li>
+</ul>
+</section>
+</section>
+<section id="highdimchange-包" class="level3">
+<h3 class="anchored" data-anchor-id="highdimchange-包"><strong>4. <code>highdimchange</code> 包</strong></h3>
+<p><code>highdimchange</code> 是针对 <strong>高维数据</strong> 的变点检测工具，特别适合用于大规模的多变量数据。</p>
+<section id="方法和参数-2" class="level4">
+<h4 class="anchored" data-anchor-id="方法和参数-2"><strong>方法和参数</strong>：</h4>
+<ul>
+<li><p><strong><code>highdim_change_point()</code></strong>：基于 <strong>稀疏建模</strong> 和 <strong>矩阵分解</strong> 技术进行高维时间序列变点检测。</p>
+<ul>
+<li>它通过矩阵分解（例如主成分分析）降维，再在降维后的数据上进行变点检测。</li>
+</ul></li>
+</ul>
+</section>
+<section id="重要参数-2" class="level4">
+<h4 class="anchored" data-anchor-id="重要参数-2"><strong>重要参数</strong>：</h4>
+<ul>
+<li><p><strong><code>data</code></strong>：输入的高维时间序列数据。</p></li>
+<li><p><strong><code>penalty</code></strong>：控制变点检测的灵敏度。</p></li>
+<li><p><strong><code>method</code></strong>：选择变点检测的方法（如 SVD 方法、PCA 方法等）。</p></li>
+</ul>
+</section>
+<section id="调参方法-2" class="level4">
+<h4 class="anchored" data-anchor-id="调参方法-2"><strong>调参方法</strong>：</h4>
+</section>
+<section id="调参建议-3" class="level4">
+<h4 class="anchored" data-anchor-id="调参建议-3"><strong>调参建议</strong>：</h4>
+<ul>
+<li><p><strong><code>penalty</code></strong>：通过调整惩罚项来控制变点的数量。较大的惩罚项通常会减少变点的数量。</p></li>
+<li><p><strong><code>method</code></strong>：可以选择不同的降维方法（如 PCA 或 SVD）来适应数据的性质。如果数据本身比较稀疏，可以选择 <code>PCA</code> 方法。</p></li>
+</ul>
+</section>
+</section>
+<section id="hdcd" class="level3">
+<h3 class="anchored" data-anchor-id="hdcd"><strong>5.<code>HDCD</code></strong></h3>
+<p><code>HDCD</code> 包提供了 <strong>高维数据变点检测</strong> 的方法，使用 <strong>协方差矩阵</strong> 变化来检测数据的结构性变点。该包专门为 <strong>高维数据</strong> 提供了一些优化算法。</p>
+<section id="方法和参数hdcd_method" class="level4">
+<h4 class="anchored" data-anchor-id="方法和参数hdcd_method"><strong>方法和参数：<code>HDCD_method()</code></strong></h4>
+<p><code>HDCD_method()</code> 是 HDCD 包的核心函数，用于高维数据的变点检测。</p>
+</section>
+<section id="关键参数" class="level4">
+<h4 class="anchored" data-anchor-id="关键参数"><strong>关键参数：</strong></h4>
+<ol type="1">
+<li><p><strong><code>data_matrix</code></strong>（类型：<code>matrix</code> 或 <code>data.frame</code>）</p>
+<ul>
+<li><strong>描述</strong>：输入的高维时间序列数据，每列表示一个变量，行表示不同时间点。</li>
+</ul></li>
+<li><p><strong><code>penalty</code></strong>（类型：<code>character</code>）</p>
+<ul>
+<li><p><strong>描述</strong>：控制变点数量的惩罚参数。常用值：</p>
+<ul>
+<li><p><code>"BIC"</code>：贝叶斯信息准则。</p></li>
+<li><p><code>"AIC"</code>：赤池信息准则。</p></li>
+<li><p><code>"MBIC"</code>：修改贝叶斯信息准则。</p></li>
+</ul></li>
+<li><p><strong>作用</strong>：增加惩罚项会减少变点数量，减小惩罚项会检测到更多变点。</p></li>
+</ul></li>
+<li><p><strong><code>minseglen</code></strong>（类型：<code>integer</code>）</p>
+<ul>
+<li><strong>描述</strong>：最小段长度，控制每段的最小时间点数。增加此参数会减少频繁变点，增加每个变点之间的时间间隔。</li>
+</ul></li>
+<li><p><strong><code>threshold</code></strong>（类型：<code>numeric</code>）</p>
+<ul>
+<li><strong>描述</strong>：控制变点显著性的阈值。较低的阈值会导致更多的变点被检测，较高的阈值会减少变点数量。</li>
+</ul></li>
+<li><p><strong><code>verbose</code></strong>（类型：<code>logical</code>）</p>
+<ul>
+<li><strong>描述</strong>：是否显示详细的计算过程。设置为 <code>TRUE</code> 可以查看变点检测的详细过程，有助于调试。</li>
+</ul></li>
+</ol>
+</section>
+<section id="调参方法-3" class="level4">
+<h4 class="anchored" data-anchor-id="调参方法-3"><strong>调参方法:</strong></h4>
+</section>
+<section id="调参建议-4" class="level4">
+<h4 class="anchored" data-anchor-id="调参建议-4">调参建议：</h4>
+<ul>
+<li><p><strong><code>penalty</code></strong>：通过选择适当的惩罚项（如 <code>"BIC"</code> 或 <code>"AIC"</code>）来控制变点的数量。<code>BIC</code> 适用于减少变点，<code>AIC</code> 和 <code>MBIC</code> 会检测更多的变点。</p></li>
+<li><p><strong><code>minseglen</code></strong>：如果数据中的变点间隔较大，可以增加 <code>minseglen</code> 的值，减少过于频繁的变点。</p></li>
+<li><p><strong><code>threshold</code></strong>：通过设置 <code>threshold</code> 可以调整变点的显著性，较低的阈值会使得检测到更多变点，而较高的阈值会减少变点。</p></li>
+</ul>
+</section>
+</section>
+<section id="总结" class="level3">
+<h3 class="anchored" data-anchor-id="总结">总结</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>方法</th>
+<th>适用情况</th>
+<th>原理</th>
+<th>优点</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong><code>changepoint.np</code></strong></td>
+<td>高维数据，非线性关系</td>
+<td>使用非参数方法检测数据的变化点，基于统计量变化</td>
+<td>无需假设数据分布，适应复杂数据</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong><code>bcp</code></strong></td>
+<td>需要处理不确定性概率的情况</td>
+<td>基于贝叶斯推断，估计变点的位置和概率</td>
+<td>提供变点的后验概率，适用于小样本数据</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong><code>multivar.change.point</code></strong></td>
+<td>多变量时间序列数据</td>
+<td>基于协方差矩阵变化检测变点</td>
+<td>专为多变量数据设计，关注协方差结构</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong><code>highdimchange</code></strong></td>
+<td>高维时间序列数据</td>
+<td>使用稀疏建模和矩阵分解技术，降维后进行变点检测</td>
+<td>处理高维数据，捕捉稀疏变化点</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
